@@ -42,7 +42,7 @@ public class DoctorBLLTester {
                     doctorBLL.deleteDoctor();
                     break;
                 case 5:
-                    doctorBLL.searchDepartmentbyName();
+                    doctorBLL.searchDoctorbyName();
                     break;
                 case 6:
                     doctorBLL.storeDataToFile();

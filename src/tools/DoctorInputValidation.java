@@ -16,7 +16,7 @@ public class DoctorInputValidation {
 
     public static boolean checkNameLength(String input) {
         if(input.isEmpty()) return false;
-        return 5<=input.length() && input.length()<=20;
+        return input.length()<=20;
     }
 
     public static boolean checkSexFormat(String input) {

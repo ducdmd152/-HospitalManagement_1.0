@@ -20,8 +20,6 @@ public class DateHandler {
     }
     
     public static Date createDateFromPattern(String date, String regex) throws Exception {
-//        System.out.println(date);
-//        System.out.println(regexPattern);
         try {
             return new SimpleDateFormat(regex).parse(date);
         }

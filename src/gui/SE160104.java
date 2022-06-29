@@ -139,7 +139,7 @@ public class SE160104 {
                         subChoice = curSubMenu.getChoice();
                         switch (subChoice) {
                             case 1:
-                                doctBLL.searchDepartmentbyName();
+                                doctBLL.searchDoctorbyName();
                                 break;
                             case 2:
                                 deptBLL.searchDepartmentbyID();
@@ -152,6 +152,7 @@ public class SE160104 {
                 case 6:
                     deptBLL.storeDataToFile();
                     doctBLL.storeDataToFile();
+                    System.out.println("Store file successfully");
                     break;
                 default:
             }

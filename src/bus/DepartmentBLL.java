@@ -66,14 +66,8 @@ public class DepartmentBLL {
         SortedMap<String, String> records = new TreeMap<>();
         
         for(Department department : departments) {
-            String departmentID = department.getDepartmentID();
-            String name = department.getName();
-            String createDate = DateHandler.toPatternFormat(department.getCreateDate(), ApplicationDataFormat.DATE_FORMAT);
-//            System.out.println(department.getCreateDate());
-            String lastUpdateDate = DateHandler.toPatternFormat(department.getLastUpdateDate(), ApplicationDataFormat.DATE_FORMAT);
-            if(lastUpdateDate==null) lastUpdateDate = "Not yet";
-            String record = String.format("%s=====%s=====%s=====%s", departmentID, name, createDate, lastUpdateDate);
-            records.put(departmentID, record);
+            String record = departmentOutpuFormat(department);
+            records.put(department.getDepartmentID(), record);
         }
         
         System.out.println("List of department in hospital");
@@ -130,13 +124,25 @@ public class DepartmentBLL {
             System.out.println("Department Repository is EMPTY!");
             return;
         }
-        DepartmentInputter deptInputter = new DepartmentInputter(deptRepo);
-        String departmentID = deptInputter.inputExistedDepartmentID();
         
-        if(!doctRepo.getDoctorsBelongTo(departmentID).isEmpty()) {
-            System.out.println("Cannot delete the department!");
-            return;
-        }
+        DepartmentInputter deptInputter = new DepartmentInputter(deptRepo);
+        String departmentID = null;
+        String input;
+        boolean OK;
+        OK = true;
+        do {
+            input = deptInputter.inputExistedDepartmentID();
+            try {
+                if(!doctRepo.getDoctorsBelongTo(input).isEmpty())
+                    throw new Exception("Cannot delete the department that has doctors!");
+                
+                departmentID = input;
+                OK = true;
+            } catch (Exception e) {
+                System.out.println("Invalid input");
+                OK = false;
+            }
+        } while(!OK);
         
         deptRepo.delete(departmentID);
     }
@@ -147,11 +153,18 @@ public class DepartmentBLL {
             return;
         }
         DepartmentInputter deptInputter = new DepartmentInputter(deptRepo);
-        String departmentID = deptInputter.inputExistedDepartmentID();
+        String departmentID = deptInputter.inputDepartmentID();
         
         Department department = deptRepo.details(departmentID);
         
-        System.out.println(department);
+        if(department!=null) {
+            System.out.println("List of department in hospital whose id = " + departmentID);
+            System.out.println(departmentOutpuFormat(department));
+            System.out.println("Number of departments: 1");
+        }
+        else {
+            System.out.println("Nothing here");
+        }
     }
     
     public void storeDataToFile() {
@@ -162,4 +175,17 @@ public class DepartmentBLL {
         }
     }
 
+    
+    private String departmentOutpuFormat(Department department) {
+        String departmentID = department.getDepartmentID();
+        String name = department.getName();
+        String createDate = DateHandler.toPatternFormat(department.getCreateDate(), ApplicationDataFormat.DATE_FORMAT);
+        //            System.out.println(department.getCreateDate());
+        String lastUpdateDate = DateHandler.toPatternFormat(department.getLastUpdateDate(), ApplicationDataFormat.DATE_FORMAT);
+        if(lastUpdateDate==null) lastUpdateDate = "Not yet";
+        String record = String.format("%s=====%s=====%s=====%s", departmentID, name, createDate, lastUpdateDate);
+        
+        
+        return record;
+    }
 }

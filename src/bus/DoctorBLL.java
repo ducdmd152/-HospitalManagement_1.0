@@ -23,10 +23,11 @@ import tools.DoctorInputter;
  * @author MSI
  */
 public class DoctorBLL {
-    private DoctorRepository doctRepo = new DoctorRepository();
+    private DoctorRepository doctRepo;
     private DepartmentRepository deptRepo;
 
     public DoctorBLL() {
+        doctRepo = new DoctorRepository();
         deptRepo = new DepartmentRepository();
         try {
             doctRepo.readFromFile();
@@ -36,6 +37,7 @@ public class DoctorBLL {
     }
 
     public DoctorBLL(DepartmentRepository deptRepo) {
+        doctRepo = new DoctorRepository(deptRepo);
         this.deptRepo = deptRepo;
         try {
             doctRepo.readFromFile();
@@ -68,14 +70,8 @@ public class DoctorBLL {
         SortedMap<String, String> records = new TreeMap<>();
         
         for(Doctor doctor : doctors) {
-            String doctorID = doctor.getDoctorID();
-            String name = doctor.getName();
-            String sex = doctor.getSex() ? "male" : "female";
-            String address = doctor.getAddress();
-            String department = deptRepo.details(doctor.getDepartmentID()).getName();
-            
-            String record = String.format("%s=====%s=====%s=====%s=====%s", doctorID, name, sex, address, department);
-            records.put(doctorID, record);
+            String record = doctorOutputFormat(doctor);
+            records.put(doctor.getDoctorID(), record);
         }
         
         System.out.println("List of doctor in hospital");
@@ -195,14 +191,41 @@ public class DoctorBLL {
         doctRepo.delete(doctorID);
     }
     
-    public void searchDepartmentbyName() {
-        String name = DoctorInputter.inputName();
+    public void searchDoctorbyName() {
+        String piece_of_name = DoctorInputter.inputName();
+        piece_of_name = piece_of_name.toLowerCase();
         
-        List<Doctor> doctors = doctRepo.searchDoctorByName(name);
+        List<Doctor> doctors = doctRepo.searchDoctorByName(piece_of_name);
+        
+        if(doctors.isEmpty()) {
+            System.out.println("Nothing here");
+            return;
+        }
+        SortedMap<String, String> records = new TreeMap<>();
         
         for(Doctor doctor : doctors) {
-            System.out.println(doctor);
+            String record = doctorOutputFormat(doctor);
+            records.put(doctor.getDoctorID(), record);
         }
+        
+        System.out.println("List of doctor in hospital whose names contain '" + piece_of_name + "'");
+        System.out.println("ID=====Name=====Sex=====Address=====Department");
+        for(String record : records.values()) {
+            System.out.println(record);
+        }
+        System.out.println("Number of doctors: " + doctors.size());
+    }
+
+    private String doctorOutputFormat(Doctor doctor) {
+        String doctorID = doctor.getDoctorID();
+        String name = doctor.getName();
+        String sex = doctor.getSex() ? "male" : "female";
+        String address = doctor.getAddress();
+        String department = deptRepo.details(doctor.getDepartmentID()).getName();
+        String record = String.format("%s=====%s=====%s=====%s=====%s", doctorID, name, sex, address, department);
+        
+//        record += " " + doctor.getDepartmentID();
+        return record;
     }
     
     public void storeDataToFile() {

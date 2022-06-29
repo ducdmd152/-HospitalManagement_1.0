@@ -11,8 +11,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.SortedMap;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 import model.Department;
+import model.Doctor;
 import tools.ApplicationDataFormat;
 import tools.DateHandler;
 
@@ -107,8 +110,17 @@ public class DepartmentRepository implements ICrud<String, Department> {
     
     public void writeToFile() throws Exception {
         BufferedWriter writer = new BufferedWriter(new FileWriter(storage));
-        for(Department department : departmentList.values())
-            writer.write(department.toString() + "\n");
+        
+        SortedMap<String, String> records = new TreeMap<>();
+        
+        for(Department department : departmentList.values()) {
+            String record = dapartmentToStringFormatInFile(department);
+            records.put(department.getDepartmentID(), record);
+        }
+        
+        for(String record : records.values()) {
+            writer.write(record + "\n");
+        }
         writer.close();
     }
     
@@ -121,5 +133,15 @@ public class DepartmentRepository implements ICrud<String, Department> {
 
     public boolean isEmpty() {
         return departmentList.isEmpty();
+    }
+
+    private String dapartmentToStringFormatInFile(Department department) {
+        String departmentID = department.getDepartmentID();
+        String name = department.getName();
+        String createDate = DateHandler.toPatternFormat(department.getCreateDate(), ApplicationDataFormat.DATE_FORMAT);
+        String lastUpdateDate = DateHandler.toPatternFormat(department.getLastUpdateDate(), ApplicationDataFormat.DATE_FORMAT);
+        if(lastUpdateDate==null) lastUpdateDate = "NULL";
+        
+        return departmentID + "," + name + "," + createDate + "," + lastUpdateDate;
     }
 }

@@ -17,7 +17,7 @@ public class HospitalBLL {
 
     public HospitalBLL() {
         DepartmentRepository deptRepo = new DepartmentRepository();
-        DoctorRepository doctRepo = new DoctorRepository();
+        DoctorRepository doctRepo = new DoctorRepository(deptRepo);
         
         departmentBLL = new DepartmentBLL(deptRepo, doctRepo);
         doctorBLL = new DoctorBLL(doctRepo, deptRepo);

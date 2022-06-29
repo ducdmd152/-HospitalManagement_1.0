@@ -12,7 +12,9 @@ import java.io.FileWriter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.SortedMap;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 import java.util.Vector;
 import model.Doctor;
 import tools.ApplicationDataFormat;
@@ -24,8 +26,19 @@ import tools.DateHandler;
  */
 public class DoctorRepository implements ICrud<String, Doctor> {
     private HashMap<String, Doctor> doctorList = new HashMap();
+    private DepartmentRepository deptRepo;
+    
     private static File storage = new File("./doctor.dat");
 
+    public DoctorRepository() {
+        this.deptRepo = new DepartmentRepository();
+    }
+
+    
+    public DoctorRepository(DepartmentRepository deptRepo) {
+        this.deptRepo = deptRepo;
+    }
+    
     @Override
     public int create(Doctor newItem) {
         try {
@@ -94,15 +107,25 @@ public class DoctorRepository implements ICrud<String, Doctor> {
     
     public void writeToFile() throws Exception {
         BufferedWriter writer = new BufferedWriter(new FileWriter(storage));
-        for(Doctor doctor : doctorList.values())
-            writer.write(doctor.toString() + "\n");
+        
+        SortedMap<String, String> records = new TreeMap<>();
+        
+        for(Doctor doctor : doctorList.values()) {
+            String record = doctorToStringFormatInFile(doctor);
+            records.put(doctor.getDoctorID(), record);
+        }
+        
+        for(String record : records.values()) {
+            writer.write(record + "\n");
+        }
+        
         writer.close();
     }
 
     public List<Doctor> searchDoctorByName(String name) {
         List<Doctor> doctors = new Vector();
         for(Doctor doctor : doctorList.values()) {
-            if(doctor.getName().equals(name))
+            if(doctor.getName().toLowerCase().contains(name.toLowerCase()))
                 doctors.add(doctor);
         }
         
@@ -127,5 +150,22 @@ public class DoctorRepository implements ICrud<String, Doctor> {
                 list.add(doctor);
         
         return list;
+    }
+
+    private String doctorToStringFormatInFile(Doctor doctor) {
+        /// DOC001,An,True,98 Ly Thai To Q3 TP.HCM,DEP01,12-07-2021,23-04-2022
+        String doctorID = doctor.getDoctorID();
+        String name = doctor.getName();
+        String sex = doctor.getSex() ? "True" : "False";
+        String address = doctor.getAddress();
+        if(address==null) address = "NULL";
+        
+        String departmentID = doctor.getDepartmentID();
+        String createDate = DateHandler.toPatternFormat(doctor.getCreateDate(), ApplicationDataFormat.DATE_FORMAT);
+        String lastUpdateDate = DateHandler.toPatternFormat(doctor.getLastUpdateDate(), ApplicationDataFormat.DATE_FORMAT);
+        if(lastUpdateDate==null) lastUpdateDate = "NULL";
+        String record = String.format("%s,%s,%s,%s,%s,%s,%s", doctorID, name, sex, address, departmentID, createDate, lastUpdateDate);
+        
+        return record;
     }
 }
