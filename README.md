@@ -24,7 +24,7 @@
 - Doctor(
     - **ID**: DOCxxx (x is a digit in 0..9)
     - **name**: String
-    - **sex**: true/false ~ male/female
+    - **gender**: true/false ~ male/female
     - **address**: String
     - **departmentID**
     - createDate: Date
